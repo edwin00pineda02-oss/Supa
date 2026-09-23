@@ -1,95 +1,330 @@
-// 1. Tus credenciales
-const supabaseUrl = 'https://wufqpdujbuvsvjtfagiv.supabase.co';
-const supabaseKey = 'sb_publishable_UXPWKCl0vWuM-lgwKvr-dQ_V47i30ll';
 
-// 2. Creamos el cliente UNA SOLA VEZ y de forma global
+const supabaseUrl = 'https://wufqpdujbuvsvjtfagiv.supabase.co';
+
+const supabaseKey =
+    'sb_publishable_UXPWKCl0vWuM-lgwKvr-dQ_V47i30ll';
+
+
+// Cliente de Supabase
 let supabaseClient = null;
 
-// 3. Esperamos a que el HTML esté cargado antes de buscar el botón
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // Asignamos el evento click al botón CONECTAR
-    const btnConectar = document.getElementById('btnConectar');
-    
+
+// ============================================
+// CUANDO CARGA EL HTML
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    console.log("JavaScript cargado correctamente");
+
+
+    // -----------------------------
+    // BOTÓN CONECTAR
+    // -----------------------------
+
+    const btnConectar =
+        document.getElementById('btnConectar');
+
     if (btnConectar) {
-        btnConectar.addEventListener('click', conectarSupabase);
+
+        btnConectar.addEventListener(
+            'click',
+            conectarSupabase
+        );
+
     } else {
-        console.error("No se encontró el botón btnConectar en el HTML");
+
+        console.error(
+            "No se encontró btnConectar"
+        );
     }
-    const btnBuscar = document.getElementById('btnBuscar');
+
+
+    // -----------------------------
+    // BOTÓN BUSCAR
+    // -----------------------------
+
+    const btnBuscar =
+        document.getElementById('btnBuscar');
+
     if (btnBuscar) {
-        btnBuscar.addEventListener('click', buscarCategoria);
+
+        btnBuscar.addEventListener(
+            'click',
+            buscarCategoria
+        );
+
     } else {
-        console.error("No se encontró el botón btnBuscar en el HTML");
+
+        console.error(
+            "No se encontró btnBuscar"
+        );
     }
+
 });
 
-// 4. Función que se ejecuta al hacer clic en CONECTAR
+
+// ============================================
+// CONECTAR CON SUPABASE
+// ============================================
+
 function conectarSupabase() {
-    try {
-        // Si aún no se ha creado el cliente, lo creamos
-        if (!supabaseClient) {
-            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        }
-        
-        // Si se crea correctamente, mostramos el mensaje
-        alert("CONEXIÓN EXITOSA");
-        console.log("Cliente Supabase inicializado correctamente:", supabaseClient);
-        
-    } catch (error) {
-        alert("ERROR DE CONEXIÓN");
-        console.error("Detalles del error:", error);
-    }
-}
-async function buscarCategoria() {
-    // 1. Verificar que el cliente esté conectado
-    if (!supabaseClient) {
-        alert("Primero debes conectarte 🔌");
-        return;
-    }
-
-    // 2. Obtener los valores del formulario
-    const id = document.getElementById('id_categoria').value.trim();
-    const nombre = document.getElementById('nombre_categoria').value.trim();
-
-    // 3. Validar que al menos uno esté lleno
-    if (!id && !nombre) {
-        alert("Ingresa un ID o un Nombre para buscar ⚠️");
-        return;
-    }
 
     try {
-        // 4. Construir la consulta base
-        let query = supabaseClient.from('categorias').select('*');
 
-        // 5. Filtrar según lo que el usuario escribió
-        if (id) {
-            query = query.eq('id_categoria', id);
-        }
-        if (nombre) {
-            query = query.ilike('nombre', %${nombre}%); // 'nombre' es el campo real en Supabase
-        }
+        // Verificamos que la librería esté cargada
+        if (typeof supabase === 'undefined') {
 
-        // 6. Ejecutar la consulta
-        const { data, error } = await query;
+            alert(
+                "ERROR: La librería de Supabase no está cargada."
+            );
 
-        if (error) throw error;
+            console.error(
+                "No existe window.supabase"
+            );
 
-        // 7. Si no hay resultados
-        if (!data || data.length === 0) {
-            alert("No se encontró ninguna categoría ❌");
             return;
         }
 
-        // 8. Mostrar el primer resultado en el formulario
-        document.getElementById('id_categoria').value = data[0].id_categoria;
-        document.getElementById('nombre_categoria').value = data[0].nombre;
-        document.getElementById('estado').value = data[0].estado;
 
-        alert(✅ Se encontraron ${data.length} resultado(s).);
+        // Creamos el cliente solamente una vez
+        if (!supabaseClient) {
+
+            supabaseClient =
+                supabase.createClient(
+                    supabaseUrl,
+                    supabaseKey
+                );
+
+        }
+
+
+        console.log(
+            "Cliente Supabase:",
+            supabaseClient
+        );
+
+
+        alert(
+            "✅ CONEXIÓN EXITOSA"
+        );
+
 
     } catch (error) {
-        alert("Error al buscar ❌: " + error.message);
-        console.error("Detalle del error:", error);
+
+        console.error(
+            "Error al conectar:",
+            error
+        );
+
+        alert(
+            "❌ ERROR DE CONEXIÓN: " +
+            error.message
+        );
+
     }
+
+}
+
+
+// ============================================
+// BUSCAR CATEGORÍA
+// ============================================
+
+async function buscarCategoria() {
+
+    console.log(
+        "Botón BUSCAR presionado"
+    );
+
+
+    // --------------------------------
+    // Verificar conexión
+    // --------------------------------
+
+    if (!supabaseClient) {
+
+        alert(
+            "⚠️ Primero debes presionar CONECTAR"
+        );
+
+        return;
+    }
+
+
+    // --------------------------------
+    // Obtener valores
+    // --------------------------------
+
+    const inputId =
+        document.getElementById(
+            'id_categoria'
+        );
+
+    const inputNombre =
+        document.getElementById(
+            'nombre_categoria'
+        );
+
+    const inputEstado =
+        document.getElementById(
+            'estado'
+        );
+
+
+    const id =
+        inputId.value.trim();
+
+    const nombre =
+        inputNombre.value.trim();
+
+
+    console.log("ID:", id);
+    console.log("Nombre:", nombre);
+
+
+    // --------------------------------
+    // Validar búsqueda
+    // --------------------------------
+
+    if (!id && !nombre) {
+
+        alert(
+            "⚠️ Ingresa un ID o un Nombre para buscar"
+        );
+
+        return;
+    }
+
+
+    try {
+
+        // --------------------------------
+        // Crear consulta
+        // --------------------------------
+
+        let query =
+            supabaseClient
+                .from('categorias')
+                .select('*');
+
+
+        // --------------------------------
+        // Buscar por ID
+        // --------------------------------
+
+        if (id) {
+
+            query =
+                query.eq(
+                    'id_categoria',
+                    id
+                );
+
+        }
+
+
+        // --------------------------------
+        // Buscar por nombre
+        // --------------------------------
+
+        if (nombre) {
+
+            query =
+                query.ilike(
+                    'nombre',
+                    `%${nombre}%`
+                );
+
+        }
+
+
+        console.log(
+            "Ejecutando consulta..."
+        );
+
+
+        // --------------------------------
+        // Ejecutar consulta
+        // --------------------------------
+
+        const {
+            data,
+            error
+        } = await query;
+
+
+        // --------------------------------
+        // Comprobar error
+        // --------------------------------
+
+        if (error) {
+
+            console.error(
+                "Error de Supabase:",
+                error
+            );
+
+            throw error;
+        }
+
+
+        console.log(
+            "Datos encontrados:",
+            data
+        );
+
+
+        // --------------------------------
+        // No hay resultados
+        // --------------------------------
+
+        if (!data || data.length === 0) {
+
+            alert(
+                "❌ No se encontró ninguna categoría"
+            );
+
+            return;
+        }
+
+
+        // --------------------------------
+        // Mostrar resultado
+        // --------------------------------
+
+        inputId.value =
+            data[0].id_categoria;
+
+        inputNombre.value =
+            data[0].nombre;
+
+        inputEstado.value =
+            data[0].estado;
+
+
+        // --------------------------------
+        // Mensaje
+        // --------------------------------
+
+        alert(
+            `✅ Se encontraron ${data.length} resultado(s).`
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error completo:",
+            error
+        );
+
+
+        alert(
+            "❌ Error al buscar:\n" +
+            error.message
+        );
+
+    }
+
 }
