@@ -17,12 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Botón BUSCAR
-    const btnBuscar = document.getElementById('btnbuscar');
+    const btnbuscar = document.getElementById('btnbuscar');
 
     if (btnbuscar) {
-        btnBuscar.addEventListener('click', buscarCategoria);
+        btnbuscar.addEventListener('click', buscarCategoria);
     } else {
-        console.error("No se encontró el botón btnBuscar en el HTML");
+        console.error("No se encontró el botón btnbuscar en el HTML");
     }
 });
 
